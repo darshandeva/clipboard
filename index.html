@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-language WordPad</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .toolbar {
+            margin-bottom: 10px;
+        }
+        .editor {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif, SimSun, "Noto Sans Tamil";
+        }
+    </style>
+</head>
+<body>
+    <h2>Multi-language WordPad (Sync with GitHub Gist)</h2>
+    <div class="toolbar">
+        <button onclick="document.execCommand('bold')">Bold</button>
+        <button onclick="document.execCommand('italic')">Italic</button>
+        <button onclick="document.execCommand('underline')">Underline</button>
+        <button onclick="saveText()">Save</button>
+        <button onclick="loadText()">Load</button>
+    </div>
+    <textarea id="editor" class="editor"></textarea>
+
+    <script>
+        const GIST_ID = "dd06f8b208e2d3a6073388cb8131e7a1"; // Replace with your Gist ID
+        const GITHUB_TOKEN = "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"; // Replace with your GitHub Token (if needed)
+
+        async function loadText() {
+            const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+            const data = await response.json();
+            const content = data.files["wordpad.txt"].content;
+            document.getElementById("editor").value = content;
+        }
+
+        async function saveText() {
+            const content = document.getElementById("editor").value;
+            const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: "PATCH",
+                headers: {
+                    "Authorization": `token ${GITHUB_TOKEN}`,
+                    "Accept": "application/vnd.github.v3+json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    files: {
+                        "wordpad.txt": {
+                            content: content
+                        }
+                    }
+                })
+            });
+
+            if (response.ok) {
+                alert("Text saved successfully!");
+            } else {
+                alert("Failed to save text.");
+            }
+        }
+
+        loadText(); // Load text when the page loads
+    </script>
+</body>
+</html>
